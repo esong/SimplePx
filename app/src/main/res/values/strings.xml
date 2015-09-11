@@ -3,4 +3,11 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
+    <string name="discover">Discover</string>
+    <string name="flow">Flow</string>
+    <string name="editor">Editors\' Choice</string>
+    <string name="popular">Popular</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="fresh">Fresh</string>
 </resources>

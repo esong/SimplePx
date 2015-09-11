@@ -10,6 +10,6 @@ import rx.Observable;
  * Created by esong on 15-09-08.
  */
 public interface PxApi {
-    @GET("/photos?image_size=600&rpp=50")
+    @GET("/photos?image_size=440&rpp=50")
     Observable<ApiResult> photos(@Query("feature") String feature);
 }

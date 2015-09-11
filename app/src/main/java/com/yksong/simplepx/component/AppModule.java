@@ -1,8 +1,12 @@
 package com.yksong.simplepx.component;
 
 import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.yksong.simplepx.R;
+import com.yksong.simplepx.app.PxPreference;
 import com.yksong.simplepx.network.PxApi;
 import com.yksong.simplepx.network.SignedOkClient;
 
@@ -18,6 +22,8 @@ import retrofit.RestAdapter;
 @Module
 public class AppModule {
     private final PxApi mApi;
+    private final SharedPreferences mPreferences;
+
     private static String HOST = "https://api.500px.com/v1";
 
     public AppModule(Application application) {
@@ -30,11 +36,20 @@ public class AppModule {
                 .build();
 
         mApi = restAdapter.create(PxApi.class);
+
+        mPreferences = application.getSharedPreferences(PxPreference.PREFERENCE_NAME,
+                Context.MODE_PRIVATE);
     }
 
     @Provides
     @Singleton
     public PxApi providePxApi() {
         return mApi;
+    }
+
+    @Provides
+    @Singleton
+    public SharedPreferences providePreferences() {
+        return mPreferences;
     }
 }

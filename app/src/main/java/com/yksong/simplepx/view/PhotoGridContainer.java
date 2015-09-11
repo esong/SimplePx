@@ -3,17 +3,18 @@ package com.yksong.simplepx.view;
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.squareup.picasso.Picasso;
 import com.yksong.simplepx.MainActivity;
 import com.yksong.simplepx.R;
-import com.yksong.simplepx.component.MainActivityComponent;
 import com.yksong.simplepx.model.Photo;
 import com.yksong.simplepx.presenter.PhotoPresenter;
 
@@ -31,6 +32,8 @@ public class PhotoGridContainer extends RelativeLayout {
     @Bind(R.id.photoGrid) RecyclerView mPhotoList;
 
     @Inject PhotoPresenter mPresenter;
+
+    GridLayoutManager mLayoutManager;
 
     public PhotoGridContainer(Context context) {
         this(context, null);
@@ -51,11 +54,34 @@ public class PhotoGridContainer extends RelativeLayout {
         super.onFinishInflate();
 
         ButterKnife.bind(this);
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
+        mLayoutManager = new GridLayoutManager(getContext(), 3) {
+            @Override
+            protected int getExtraLayoutSpace(RecyclerView.State state) {
+                return super.getExtraLayoutSpace(state) * 3;
+            }
+        };
 
-        mPhotoList.setLayoutManager(layoutManager);
+        mPhotoList.setLayoutManager(mLayoutManager);
+
+        mPhotoList.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        mPhotoList.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        int viewWidth = mPhotoList.getMeasuredWidth();
+                        float cardViewWidth = getContext().getResources()
+                                .getDimension(R.dimen.photo_dimen);
+                        int newSpanCount = (int) Math.ceil(viewWidth / cardViewWidth);
+                        mLayoutManager.setSpanCount(newSpanCount);
+                        mLayoutManager.requestLayout();
+                    }
+                });
 
         mPresenter.takeView(this);
+        requestPhotos();
+    }
+
+    public void requestPhotos() {
         mPresenter.requestPhotos();
     }
 
@@ -92,6 +118,7 @@ public class PhotoGridContainer extends RelativeLayout {
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
             mPicasso.load(mPhotos.get(position).image_url)
+                    .noFade()
                     .into(holder.mImageView);
         }
 

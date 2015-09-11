@@ -1,5 +1,6 @@
 package com.yksong.simplepx.component;
 
+import com.yksong.simplepx.MainActivity;
 import com.yksong.simplepx.presenter.PhotoPresenter;
 import com.yksong.simplepx.view.PhotoGridContainer;
 
@@ -12,4 +13,5 @@ import dagger.Subcomponent;
 @Subcomponent(modules = {MainActivityModule.class})
 public interface MainActivityComponent {
     void inject(PhotoGridContainer view);
+    void inject(MainActivity activity);
 }

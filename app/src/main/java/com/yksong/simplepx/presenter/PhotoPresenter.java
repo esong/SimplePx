@@ -1,6 +1,8 @@
 package com.yksong.simplepx.presenter;
 
-import com.yksong.simplepx.MainActivity;
+import android.content.SharedPreferences;
+
+import com.yksong.simplepx.app.PxPreference;
 import com.yksong.simplepx.component.MainActivityScope;
 import com.yksong.simplepx.model.ApiResult;
 import com.yksong.simplepx.network.PxApi;
@@ -18,6 +20,7 @@ import rx.schedulers.Schedulers;
 @MainActivityScope
 public class PhotoPresenter {
     @Inject PxApi mPxApi;
+    @Inject SharedPreferences mPreference;
 
     PhotoGridContainer mGridView;
 
@@ -29,7 +32,10 @@ public class PhotoPresenter {
     }
 
     public void requestPhotos() {
-        mPxApi.photos("editors").subscribeOn(Schedulers.newThread())
+        String feature = mPreference.getString(PxPreference.MENU_PREFERENCE_NAVI_ITEM,
+                PxPreference.MENU_PREFERENCE_NAVI_ITEM_DEFAULT);
+
+        mPxApi.photos(feature).subscribeOn(Schedulers.newThread())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<ApiResult>() {
                     @Override

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group>
+        <item
+            android:id="@+id/navigation_subheader"
+            android:title="@string/discover">
+            <menu  android:checkableBehavior="single">
+                <item
+                    android:id="@+id/navigation_popular"
+                    android:title="@string/popular"
+                    android:checkable="true"/>
+                <item
+                    android:id="@+id/navigation_fresh"
+                    android:title="@string/fresh"
+                    android:checkable="true"/>
+                <item
+                    android:id="@+id/navigation_upcoming"
+                    android:title="@string/upcoming"
+                    android:checkable="true"/>
+                <item
+                    android:id="@+id/navigation_editor"
+                    android:title="@string/editor"
+                    android:checkable="true"/>
+            </menu>
+        </item>
+
+    </group>
+</menu>

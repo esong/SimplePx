@@ -2,6 +2,7 @@ package com.yksong.simplepx.app;
 
 import android.app.Application;
 
+import com.squareup.picasso.Picasso;
 import com.yksong.simplepx.component.AppComponent;
 import com.yksong.simplepx.component.AppModule;
 import com.yksong.simplepx.component.DaggerAppComponent;
@@ -17,10 +18,12 @@ public class PxApp extends Application {
 
     @Override
     public void onCreate() {
-        super.onCreate();;
+        super.onCreate();
         mAppComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
                 .build();
+
+        Picasso.with(this).setIndicatorsEnabled(true);
     }
 
     public AppComponent getAppComponent() {

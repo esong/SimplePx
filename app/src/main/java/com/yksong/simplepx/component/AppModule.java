@@ -7,6 +7,7 @@ import android.preference.PreferenceManager;
 
 import com.yksong.simplepx.R;
 import com.yksong.simplepx.app.PxPreference;
+import com.yksong.simplepx.model.PhotoProvider;
 import com.yksong.simplepx.network.PxApi;
 import com.yksong.simplepx.network.SignedOkClient;
 
@@ -23,6 +24,7 @@ import retrofit.RestAdapter;
 public class AppModule {
     private final PxApi mApi;
     private final SharedPreferences mPreferences;
+    private final PhotoProvider mPhotoProvider;
 
     private static String HOST = "https://api.500px.com/v1";
 
@@ -39,6 +41,8 @@ public class AppModule {
 
         mPreferences = application.getSharedPreferences(PxPreference.PREFERENCE_NAME,
                 Context.MODE_PRIVATE);
+
+        mPhotoProvider = new PhotoProvider(mApi, mPreferences);
     }
 
     @Provides
@@ -51,5 +55,11 @@ public class AppModule {
     @Singleton
     public SharedPreferences providePreferences() {
         return mPreferences;
+    }
+
+    @Provides
+    @Singleton
+    public PhotoProvider providePhotoProvider() {
+        return mPhotoProvider;
     }
 }

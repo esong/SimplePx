@@ -3,7 +3,6 @@ package com.yksong.simplepx.view;
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +15,7 @@ import com.squareup.picasso.Picasso;
 import com.yksong.simplepx.MainActivity;
 import com.yksong.simplepx.R;
 import com.yksong.simplepx.model.Photo;
+import com.yksong.simplepx.model.PhotoProvider;
 import com.yksong.simplepx.presenter.PhotoPresenter;
 
 import java.util.List;
@@ -31,6 +31,7 @@ import butterknife.ButterKnife;
 public class PhotoGridContainer extends RelativeLayout {
     @Bind(R.id.photoGrid) RecyclerView mPhotoList;
 
+    @Inject PhotoProvider mPhotoProvider;
     @Inject PhotoPresenter mPresenter;
 
     GridLayoutManager mLayoutManager;
@@ -57,7 +58,7 @@ public class PhotoGridContainer extends RelativeLayout {
         mLayoutManager = new GridLayoutManager(getContext(), 3) {
             @Override
             protected int getExtraLayoutSpace(RecyclerView.State state) {
-                return super.getExtraLayoutSpace(state) * 3;
+                return super.getExtraLayoutSpace(state) * 2;
             }
         };
 
@@ -86,15 +87,15 @@ public class PhotoGridContainer extends RelativeLayout {
     }
 
     public void takePhotos(List<Photo> photos) {
-        mPhotoList.setAdapter(new PxAdapter(photos));
+        mPhotoList.setAdapter(new PxAdapter(mPhotoProvider));
     }
 
     public class PxAdapter extends RecyclerView.Adapter<PxAdapter.ViewHolder> {
-        List<Photo> mPhotos;
+        PhotoProvider mPhotoProvider;
         Picasso mPicasso;
 
-        public PxAdapter(List<Photo> photos) {
-            mPhotos = photos;
+        public PxAdapter(PhotoProvider photoProvider) {
+            mPhotoProvider = photoProvider;
             mPicasso = Picasso.with(getContext());
         }
 
@@ -117,14 +118,14 @@ public class PhotoGridContainer extends RelativeLayout {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-            mPicasso.load(mPhotos.get(position).image_url)
+            mPicasso.load(mPhotoProvider.get(position).image_url)
                     .noFade()
                     .into(holder.mImageView);
         }
 
         @Override
         public int getItemCount() {
-            return mPhotos.size();
+            return mPhotoProvider.size();
         }
     }
 

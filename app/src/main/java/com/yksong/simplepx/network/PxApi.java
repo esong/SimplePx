@@ -11,5 +11,5 @@ import rx.Observable;
  */
 public interface PxApi {
     @GET("/photos?image_size=440&rpp=50")
-    Observable<ApiResult> photos(@Query("feature") String feature);
+    Observable<ApiResult> photos(@Query("feature") String feature, @Query("page") int page);
 }

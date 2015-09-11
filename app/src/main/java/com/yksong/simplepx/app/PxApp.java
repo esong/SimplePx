@@ -22,8 +22,6 @@ public class PxApp extends Application {
         mAppComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
                 .build();
-
-        Picasso.with(this).setIndicatorsEnabled(true);
     }
 
     public AppComponent getAppComponent() {

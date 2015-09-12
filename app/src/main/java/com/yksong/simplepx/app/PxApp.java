@@ -1,8 +1,10 @@
 package com.yksong.simplepx.app;
 
 import android.app.Application;
+import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
+import com.yksong.simplepx.BuildConfig;
+import com.yksong.simplepx.R;
 import com.yksong.simplepx.component.AppComponent;
 import com.yksong.simplepx.component.AppModule;
 import com.yksong.simplepx.component.DaggerAppComponent;
@@ -23,6 +25,16 @@ public class PxApp extends Application {
                 .appModule(new AppModule(this))
                 .build();
     }
+
+    public void handleNetworkError(Throwable error) {
+        Toast.makeText(this, getText(R.string.network_error),
+                Toast.LENGTH_LONG).show();
+
+        if (BuildConfig.DEBUG) {
+            error.printStackTrace();
+        }
+    }
+
 
     public AppComponent getAppComponent() {
         return mAppComponent;

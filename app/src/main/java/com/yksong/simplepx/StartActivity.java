@@ -18,14 +18,21 @@ public class StartActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        ((PxApp) getApplication()).getAppComponent().inject(this);
-
         setContentView(R.layout.start_view);
-        mPhotoProvider.init();
+        ((PxApp)getApplication()).getAppComponent().inject(this);
 
+        mPhotoProvider.init(new Runnable() {
+            @Override
+            public void run() {
+                startMainActivity();
+            }
+        });
+    }
+
+    public void startMainActivity() {
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         startActivity(new Intent(this, MainActivity.class)
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
     }
 }

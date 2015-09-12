@@ -105,6 +105,10 @@ public class PhotoGridContainer extends RelativeLayout {
         mPhotoProvider.takePhotoGrid(adapter);
     }
 
+    public void moveToTop() {
+        mPhotoList.scrollToPosition(0);
+    }
+
     public class PxAdapter extends RecyclerView.Adapter<PxAdapter.ViewHolder> {
         PhotoProvider mPhotoProvider;
         Picasso mPicasso;

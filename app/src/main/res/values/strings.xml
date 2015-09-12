@@ -10,4 +10,6 @@
     <string name="popular">Popular</string>
     <string name="upcoming">Upcoming</string>
     <string name="fresh">Fresh</string>
+
+    <string name="network_error">Network Error: please try again later.</string>
 </resources>

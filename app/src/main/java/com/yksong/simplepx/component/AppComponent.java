@@ -1,8 +1,6 @@
 package com.yksong.simplepx.component;
 
-import com.yksong.simplepx.MainActivity;
 import com.yksong.simplepx.StartActivity;
-import com.yksong.simplepx.network.PxApi;
 
 import javax.inject.Singleton;
 

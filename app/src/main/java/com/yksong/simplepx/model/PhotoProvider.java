@@ -3,12 +3,14 @@ package com.yksong.simplepx.model;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 
+import com.yksong.simplepx.app.PxApp;
 import com.yksong.simplepx.app.PxPreference;
 import com.yksong.simplepx.network.PxApi;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
+import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -22,11 +24,21 @@ public class PhotoProvider {
 
     private PxApi mPxApi;
     private SharedPreferences mPreference;
+    private PxApp mApp;
 
     private WeakReference<RecyclerView.Adapter> mPhotoAdapter;
     private boolean mRequesting;
 
-    public PhotoProvider(PxApi pxApi, SharedPreferences preferences) {
+    private Action1<Throwable> mErrorAction = new Action1<Throwable>() {
+        @Override
+        public void call(Throwable throwable) {
+            mRequesting = false;
+            mApp.handleNetworkError(throwable);
+        }
+    };
+
+    public PhotoProvider(PxApp app, PxApi pxApi, SharedPreferences preferences) {
+        mApp = app;
         mPxApi = pxApi;
         mPreference = preferences;
 
@@ -38,9 +50,8 @@ public class PhotoProvider {
 
     public Photo get(int position) {
         if (position > mCurEndpoint.photos.size() / 2 && !mRequesting) {
-            mRequesting = true;
             mCurEndpoint.current_page += 1;
-            request();
+            requestNextPage();
         }
         return mCurEndpoint.photos.get(position);
     }
@@ -50,10 +61,10 @@ public class PhotoProvider {
     }
 
     public void takePhotoGrid(RecyclerView.Adapter ref) {
-        mPhotoAdapter = new WeakReference<RecyclerView.Adapter>(ref);
+        mPhotoAdapter = new WeakReference<>(ref);
     }
 
-    public void request(Action1... actions) {
+    public void changeFeature() {
         String newFeature = getFeatureString();
 
         if (newFeature != mCurEndpoint.feature) {
@@ -61,38 +72,55 @@ public class PhotoProvider {
 
             if (featureEndpoint != null) {
                 mCurEndpoint = featureEndpoint;
+                mPhotoAdapter.get().notifyDataSetChanged();
             } else {
                 mCurEndpoint = new ApiResult(newFeature);
-            }
-        }
-
-        request();
-    }
-
-    public void request() {
-        mPxApi.photos(mCurEndpoint.feature, mCurEndpoint.current_page)
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<ApiResult>() {
+                init(new Runnable() {
                     @Override
-                    public void call(ApiResult apiResult) {
-                        mRequesting = false;
-                        int originalPos = mCurEndpoint.photos.size();
-                        mCurEndpoint.photos.addAll(apiResult.photos);
-
-                        if (mPhotoAdapter != null) {
-                            mPhotoAdapter.get().notifyItemRangeInserted(originalPos,
-                                    apiResult.photos.size());
-                        }
+                    public void run() {
+                        mPhotoAdapter.get().notifyDataSetChanged();
                     }
                 });
+            }
+        }
     }
 
-    public void init() {
-        if (mCurEndpoint.current_page == 0) {
-            mCurEndpoint = mPxApi.photos(mCurEndpoint.feature, mCurEndpoint.current_page)
-                    .toBlocking().single();
-        }
+    public void init(final Runnable finished) {
+        requestAsyncObservable().subscribe(new Action1<ApiResult>() {
+            @Override
+            public void call(ApiResult apiResult) {
+                mRequesting = false;
+                mCurEndpoint.photos = apiResult.photos;
+                finished.run();
+            }
+        }, mErrorAction);
+    }
+
+    private void requestNextPage() {
+        requestAsyncObservable().subscribe(new Action1<ApiResult>() {
+            @Override
+            public void call(ApiResult apiResult) {
+                mRequesting = false;
+                int originalPos = mCurEndpoint.photos.size();
+                mCurEndpoint.photos.addAll(apiResult.photos);
+
+                if (mPhotoAdapter != null) {
+                    mPhotoAdapter.get().notifyItemRangeInserted(originalPos,
+                            apiResult.photos.size());
+                }
+            }
+        }, mErrorAction);
+    }
+
+    /**
+     * Constructs an async observable.
+     * @return AsyncObservable
+     */
+    private Observable<ApiResult> requestAsyncObservable() {
+        mRequesting = true;
+        return mPxApi.photos(mCurEndpoint.feature, mCurEndpoint.current_page)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
     private String getFeatureString() {

@@ -15,6 +15,7 @@ import com.yksong.simplepx.app.PxApp;
 import com.yksong.simplepx.app.PxPreference;
 import com.yksong.simplepx.component.MainActivityComponent;
 import com.yksong.simplepx.component.MainActivityModule;
+import com.yksong.simplepx.model.PhotoProvider;
 import com.yksong.simplepx.view.PhotoGridContainer;
 
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class MainActivity extends BaseActivity {
     private static HashMap<Integer, String> sMenuActionMap = new HashMap<>();
 
     @Inject SharedPreferences mPreferences;
+    @Inject PhotoProvider mPhotoProvider;
 
     @Bind(R.id.toolbar) Toolbar mToolBar;
     @Bind(R.id.drawer_layout) DrawerLayout mDrawer;
@@ -62,15 +64,28 @@ public class MainActivity extends BaseActivity {
             }
         });
 
+        int checkItemId = mPreferences.getInt(PxPreference.MENU_PREFRENCE_NAVI_ID,
+                R.id.navigation_popular);
+
+        if (checkItemId != 0) {
+            mNavigationView.setCheckedItem(checkItemId);
+        }
+
         mNavigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                    public boolean onNavigationItemSelected(final MenuItem menuItem) {
                         String menuAction = sMenuActionMap.get(menuItem.getItemId());
                         if (menuAction != null) {
                             mPreferences.edit()
                                     .putString(PxPreference.MENU_PREFERENCE_NAVI_ITEM, menuAction)
+                                    .putInt(PxPreference.MENU_PREFRENCE_NAVI_ID,
+                                            menuItem.getItemId())
                                     .apply();
+
+                            mPhotoProvider.changeFeature();
+                            mDrawer.closeDrawers();
+                            mPhotoContainer.moveToTop();
                         }
 
                         return true;

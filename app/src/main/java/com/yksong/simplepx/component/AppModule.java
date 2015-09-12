@@ -16,7 +16,9 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import retrofit.ErrorHandler;
 import retrofit.RestAdapter;
+import retrofit.RetrofitError;
 
 /**
  * Created by esong on 15-09-09.
@@ -30,7 +32,7 @@ public class AppModule {
 
     private static String HOST = "https://api.500px.com/v1";
 
-    public AppModule(PxApp application) {
+    public AppModule(final PxApp application) {
         mApp = application;
 
         String consumerKey = application.getResources().getString(R.string.pxConsumerKey);
@@ -46,7 +48,7 @@ public class AppModule {
         mPreferences = application.getSharedPreferences(PxPreference.PREFERENCE_NAME,
                 Context.MODE_PRIVATE);
 
-        mPhotoProvider = new PhotoProvider(mApi, mPreferences);
+        mPhotoProvider = new PhotoProvider(mApp, mApi, mPreferences);
     }
 
     @Provides

@@ -24,7 +24,7 @@ import javax.inject.Inject;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     private static HashMap<Integer, String> sMenuActionMap = new HashMap<>();
 
     @Inject SharedPreferences mPreferences;
@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
         mComponent.inject(this);
         setContentView(R.layout.activity_main);
 
-        hideStatusBar();
         ButterKnife.bind(this);
 
         mToolBar.setNavigationIcon(R.drawable.menu_icon);
@@ -65,35 +64,18 @@ public class MainActivity extends AppCompatActivity {
 
         mNavigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(MenuItem menuItem) {
-                String menuAction = sMenuActionMap.get(menuItem.getItemId());
-                if (menuAction != null) {
-                    mPreferences.edit()
-                            .putString(PxPreference.MENU_PREFERENCE_NAVI_ITEM, menuAction)
-                            .apply();
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        String menuAction = sMenuActionMap.get(menuItem.getItemId());
+                        if (menuAction != null) {
+                            mPreferences.edit()
+                                    .putString(PxPreference.MENU_PREFERENCE_NAVI_ITEM, menuAction)
+                                    .apply();
+                        }
 
-                    mPhotoContainer.requestPhotos();
-                }
-
-                return true;
-            }
-        });
-    }
-
-    private void hideStatusBar() {
-        View decorView = getWindow().getDecorView();
-        int visibility = 0;
-
-        if (Build.VERSION.SDK_INT >= 16) {
-            visibility |= View.SYSTEM_UI_FLAG_FULLSCREEN;
-        }
-
-        if (Build.VERSION.SDK_INT >= 19) {
-            visibility |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        }
-
-        decorView.setSystemUiVisibility(visibility);
+                        return true;
+                    }
+                });
     }
 
     public MainActivityComponent getComponent() {

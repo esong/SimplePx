@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.yksong.simplepx.R;
+import com.yksong.simplepx.app.PxApp;
 import com.yksong.simplepx.app.PxPreference;
 import com.yksong.simplepx.model.PhotoProvider;
 import com.yksong.simplepx.network.PxApi;
@@ -25,10 +26,13 @@ public class AppModule {
     private final PxApi mApi;
     private final SharedPreferences mPreferences;
     private final PhotoProvider mPhotoProvider;
+    private final PxApp mApp;
 
     private static String HOST = "https://api.500px.com/v1";
 
-    public AppModule(Application application) {
+    public AppModule(PxApp application) {
+        mApp = application;
+
         String consumerKey = application.getResources().getString(R.string.pxConsumerKey);
         String consumerSecret = application.getResources().getString(R.string.pxConsumerSecret);
 
@@ -61,5 +65,11 @@ public class AppModule {
     @Singleton
     public PhotoProvider providePhotoProvider() {
         return mPhotoProvider;
+    }
+
+    @Provides
+    @Singleton
+    public PxApp provideApplication() {
+        return mApp;
     }
 }

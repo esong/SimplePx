@@ -24,6 +24,7 @@ public class PhotoProvider {
     private SharedPreferences mPreference;
 
     private WeakReference<RecyclerView.Adapter> mPhotoAdapter;
+    private boolean mRequesting;
 
     public PhotoProvider(PxApi pxApi, SharedPreferences preferences) {
         mPxApi = pxApi;
@@ -36,7 +37,8 @@ public class PhotoProvider {
     }
 
     public Photo get(int position) {
-        if (position > mCurEndpoint.photos.size() / 2) {
+        if (position > mCurEndpoint.photos.size() / 2 && !mRequesting) {
+            mRequesting = true;
             mCurEndpoint.current_page += 1;
             request();
         }
@@ -74,6 +76,7 @@ public class PhotoProvider {
                 .subscribe(new Action1<ApiResult>() {
                     @Override
                     public void call(ApiResult apiResult) {
+                        mRequesting = false;
                         int originalPos = mCurEndpoint.photos.size();
                         mCurEndpoint.photos.addAll(apiResult.photos);
 
@@ -85,7 +88,7 @@ public class PhotoProvider {
                 });
     }
 
-    public void requestBlocking() {
+    public void init() {
         if (mCurEndpoint.current_page == 0) {
             mCurEndpoint = mPxApi.photos(mCurEndpoint.feature, mCurEndpoint.current_page)
                     .toBlocking().single();

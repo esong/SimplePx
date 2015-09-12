@@ -42,7 +42,7 @@ public class PhotoPresenter {
                 .subscribe(new Action1<ApiResult>() {
                     @Override
                     public void call(ApiResult apiResult) {
-                        mGridView.takePhotos(apiResult.photos);
+                        // mGridView.takePhotos(apiResult.photos);
                     }
                 });
     }

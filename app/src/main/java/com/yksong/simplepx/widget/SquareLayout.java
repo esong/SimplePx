@@ -2,13 +2,13 @@ package com.yksong.simplepx.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
 
 /**
  * Created by esong on 15-09-11.
  */
-public class SquareRelativeLayout extends RelativeLayout {
-    public SquareRelativeLayout(Context context, AttributeSet attrs) {
+public class SquareLayout extends FrameLayout {
+    public SquareLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 

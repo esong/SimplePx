@@ -22,7 +22,8 @@ public class PhotoActivity extends BaseActivity {
         setContentView(R.layout.photo_pager);
         ButterKnife.bind(this);
 
-        mToolBar.setNavigationIcon(android.R.drawable.ic_delete);
+
+        mToolBar.setNavigationIcon(R.drawable.menu_icon);
         mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

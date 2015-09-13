@@ -5,4 +5,8 @@
     </style>
 
     <style name="AppTheme" parent="AppThemeBase"/>
+
+    <style name="FullScreenTheme" parent="AppTheme">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
 </resources>

@@ -4,4 +4,5 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="photo_dimen">440px</dimen>
     <dimen name="image_margin">1dp</dimen>
+    <dimen name="page_margin">50dp</dimen>
 </resources>

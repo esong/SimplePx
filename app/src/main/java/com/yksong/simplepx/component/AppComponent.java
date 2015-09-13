@@ -1,6 +1,7 @@
 package com.yksong.simplepx.component;
 
 import com.yksong.simplepx.StartActivity;
+import com.yksong.simplepx.view.PhotoPagerView;
 
 import javax.inject.Singleton;
 
@@ -14,4 +15,5 @@ import dagger.Component;
 public interface AppComponent {
     MainActivityComponent plus(MainActivityModule mainActivityModule);
     void inject(StartActivity activity);
+    void inject(PhotoPagerView view);
 }

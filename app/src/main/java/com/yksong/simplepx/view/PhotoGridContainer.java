@@ -1,5 +1,6 @@
 package com.yksong.simplepx.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -104,6 +105,10 @@ public class PhotoGridContainer extends RelativeLayout {
         mPhotoProvider.takePhotoGrid(adapter);
     }
 
+    public void moveToPosition(int position) {
+        mPhotoList.scrollToPosition(position);
+    }
+
     public void moveToTop() {
         mPhotoList.scrollToPosition(0);
     }
@@ -129,8 +134,11 @@ public class PhotoGridContainer extends RelativeLayout {
                 itemView.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        getContext().startActivity(new Intent(getContext(), PhotoActivity.class)
-                                .putExtra(PhotoActivity.PHOTO_POSITIION, mPosition));
+                        ((Activity)getContext())
+                                .startActivityForResult(
+                                        new Intent(getContext(), PhotoActivity.class)
+                                            .putExtra(PhotoActivity.PHOTO_POSITIION, mPosition),
+                                        PhotoActivity.POSITION_REQUEST_CODE);
                     }
                 });
             }

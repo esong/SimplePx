@@ -1,5 +1,6 @@
 package com.yksong.simplepx;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.support.design.widget.NavigationView;
@@ -91,6 +92,18 @@ public class MainActivity extends BaseActivity {
                         return true;
                     }
                 });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PhotoActivity.POSITION_REQUEST_CODE
+                && resultCode == PhotoActivity.POSITION_RESPONSE_CODE) {
+            int resultPosition = data.getIntExtra(PhotoActivity.PHOTO_POSITIION, -1);
+
+            if (resultPosition != -1) {
+                mPhotoContainer.moveToPosition(resultPosition);
+            }
+        }
     }
 
     public MainActivityComponent getComponent() {

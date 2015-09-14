@@ -111,4 +111,8 @@ public class PhotoPagerView extends RelativeLayout {
         });
         mViewPager.setCurrentItem(mPhotoPosition);
     }
+
+    public int getCurrentPosition() {
+        return mPhotoPosition;
+    }
 }

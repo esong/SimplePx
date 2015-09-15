@@ -2,11 +2,9 @@ package com.yksong.simplepx;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
@@ -14,8 +12,6 @@ import android.view.View;
 
 import com.yksong.simplepx.app.PxApp;
 import com.yksong.simplepx.app.PxPreference;
-import com.yksong.simplepx.component.MainActivityComponent;
-import com.yksong.simplepx.component.MainActivityModule;
 import com.yksong.simplepx.model.PhotoProvider;
 import com.yksong.simplepx.view.PhotoGridContainer;
 
@@ -37,7 +33,6 @@ public class MainActivity extends BaseActivity {
     @Bind(R.id.navigation) NavigationView mNavigationView;
     @Bind(R.id.photoGridContainer) PhotoGridContainer mPhotoContainer;
 
-    private MainActivityComponent mComponent;
 
     static {
         sMenuActionMap.put(R.id.navigation_editor, "editors");
@@ -50,9 +45,7 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mComponent = ((PxApp) getApplication()).getAppComponent()
-                .plus(new MainActivityModule(this));
-        mComponent.inject(this);
+        ((PxApp) getApplication()).getAppComponent().inject(this);
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
@@ -104,9 +97,5 @@ public class MainActivity extends BaseActivity {
                 mPhotoContainer.moveToPosition(resultPosition);
             }
         }
-    }
-
-    public MainActivityComponent getComponent() {
-        return mComponent;
     }
 }

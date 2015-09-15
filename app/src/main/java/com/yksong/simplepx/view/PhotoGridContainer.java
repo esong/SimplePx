@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -15,16 +17,16 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.squareup.picasso.Picasso;
-import com.yksong.simplepx.MainActivity;
 import com.yksong.simplepx.PhotoActivity;
 import com.yksong.simplepx.R;
+import com.yksong.simplepx.app.PxApp;
 import com.yksong.simplepx.model.PhotoProvider;
-import com.yksong.simplepx.presenter.PhotoPresenter;
 
 import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by esong on 15-09-09.
@@ -33,7 +35,6 @@ public class PhotoGridContainer extends RelativeLayout {
     @Bind(R.id.photoGrid) RecyclerView mPhotoList;
 
     @Inject PhotoProvider mPhotoProvider;
-    @Inject PhotoPresenter mPresenter;
 
     private GridLayoutManager mLayoutManager;
     private int mImageMargin;
@@ -49,8 +50,9 @@ public class PhotoGridContainer extends RelativeLayout {
     public PhotoGridContainer(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        ((MainActivity) context).getComponent().inject(this);
         mImageMargin = (int) context.getResources().getDimension(R.dimen.image_margin);
+
+        ((PxApp)((Activity) context).getApplication()).getAppComponent().inject(this);
     }
 
     @Override
@@ -99,7 +101,6 @@ public class PhotoGridContainer extends RelativeLayout {
             }
         });
 
-        mPresenter.takeView(this);
         PxAdapter adapter = new PxAdapter(mPhotoProvider);
         mPhotoList.setAdapter(adapter);
         mPhotoProvider.takePhotoGrid(adapter);
@@ -130,17 +131,20 @@ public class PhotoGridContainer extends RelativeLayout {
                 super(itemView);
 
                 ButterKnife.bind(this, itemView);
+            }
 
-                itemView.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        ((Activity)getContext())
-                                .startActivityForResult(
-                                        new Intent(getContext(), PhotoActivity.class)
-                                            .putExtra(PhotoActivity.PHOTO_POSITIION, mPosition),
-                                        PhotoActivity.POSITION_REQUEST_CODE);
-                    }
-                });
+            @OnClick(R.id.squareContainer)
+            public void openFullScreenPhoto(View view) {
+                Activity parentActivity = (Activity) getContext();
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                        parentActivity,
+                        new Pair<View, String>(mImageView,
+                                getResources().getString(R.string.transition_image)));
+
+                (parentActivity).startActivityForResult(
+                        new Intent(getContext(), PhotoActivity.class)
+                                .putExtra(PhotoActivity.PHOTO_POSITIION, mPosition),
+                        PhotoActivity.POSITION_REQUEST_CODE, options.toBundle());
             }
         }
 

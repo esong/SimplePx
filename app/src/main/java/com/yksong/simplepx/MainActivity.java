@@ -88,6 +88,11 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == PhotoActivity.POSITION_REQUEST_CODE
                 && resultCode == PhotoActivity.POSITION_RESPONSE_CODE) {

@@ -17,14 +17,18 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.squareup.picasso.Picasso;
+import com.yksong.simplepx.BaseActivity;
+import com.yksong.simplepx.MainActivity;
 import com.yksong.simplepx.PhotoActivity;
 import com.yksong.simplepx.R;
 import com.yksong.simplepx.app.PxApp;
+import com.yksong.simplepx.model.Photo;
 import com.yksong.simplepx.model.PhotoProvider;
 
 import javax.inject.Inject;
 
 import butterknife.Bind;
+import butterknife.BindString;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -33,6 +37,7 @@ import butterknife.OnClick;
  */
 public class PhotoGridContainer extends RelativeLayout {
     @Bind(R.id.photoGrid) RecyclerView mPhotoList;
+    @BindString(R.string.transition_image) String mTransitionImage;
 
     @Inject PhotoProvider mPhotoProvider;
 
@@ -52,7 +57,7 @@ public class PhotoGridContainer extends RelativeLayout {
 
         mImageMargin = (int) context.getResources().getDimension(R.dimen.image_margin);
 
-        ((PxApp)((Activity) context).getApplication()).getAppComponent().inject(this);
+        ((BaseActivity) context).getAppComponent().inject(this);
     }
 
     @Override
@@ -134,14 +139,13 @@ public class PhotoGridContainer extends RelativeLayout {
             }
 
             @OnClick(R.id.squareContainer)
-            public void openFullScreenPhoto(View view) {
-                Activity parentActivity = (Activity) getContext();
+            public void openFullScreenPhoto() {
+                MainActivity parentActivity = (MainActivity) getContext();
                 ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         parentActivity,
-                        new Pair<View, String>(mImageView,
-                                getResources().getString(R.string.transition_image)));
+                        new Pair<View, String>(mImageView, mTransitionImage));
 
-                (parentActivity).startActivityForResult(
+                parentActivity.startActivityForResult(
                         new Intent(getContext(), PhotoActivity.class)
                                 .putExtra(PhotoActivity.PHOTO_POSITIION, mPosition),
                         PhotoActivity.POSITION_REQUEST_CODE, options.toBundle());
@@ -169,5 +173,4 @@ public class PhotoGridContainer extends RelativeLayout {
             return mPhotoProvider.size();
         }
     }
-
 }

@@ -1,11 +1,10 @@
 package com.yksong.simplepx.view;
 
-import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
-import android.transition.Transition;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +26,8 @@ import java.util.List;
 import javax.inject.Inject;
 
 import butterknife.Bind;
+import butterknife.BindDimen;
+import butterknife.BindString;
 import butterknife.ButterKnife;
 
 /**
@@ -36,6 +37,10 @@ public class PhotoPagerView extends RelativeLayout {
     @Inject PhotoProvider mPhotoProvider;
 
     @Bind(R.id.pager) ViewPager mViewPager;
+    @BindString(R.string.transition_image) String mTransitionName;
+    @BindDimen(R.dimen.page_margin) int mPageMargin;
+
+    private InfinitePagerAdapter mAdapter;
     private int mPhotoPosition;
     private boolean mTransitionStarted;
 
@@ -43,7 +48,7 @@ public class PhotoPagerView extends RelativeLayout {
         super(context, attrs);
 
         PhotoActivity photoActivity = (PhotoActivity) context;
-        ((PxApp)photoActivity.getApplication()).getAppComponent().inject(this);
+        photoActivity.getAppComponent().inject(this);
 
         mPhotoPosition = photoActivity.getIntent().getIntExtra(PhotoActivity.PHOTO_POSITIION, 0);
     }
@@ -54,8 +59,9 @@ public class PhotoPagerView extends RelativeLayout {
 
         ButterKnife.bind(this);
 
-        mViewPager.setPageMargin(getResources().getDimensionPixelSize(R.dimen.page_margin));
-        mViewPager.setAdapter(new InfinitePagerAdapter(mViewPager));
+        mViewPager.setPageMargin(mPageMargin);
+        mAdapter = new InfinitePagerAdapter(mViewPager);
+        mViewPager.setAdapter(mAdapter);
         mViewPager.setCurrentItem(mPhotoPosition);
     }
 
@@ -65,7 +71,9 @@ public class PhotoPagerView extends RelativeLayout {
 
     private class InfinitePagerAdapter extends PagerAdapter {
         static final int sRealCount = 5;
-        private List<PagerViewHolder> mViewHolders = new ArrayList<>();
+        List<PagerViewHolder> mViewHolders = new ArrayList<>();
+
+        private Picasso mPicasso;
 
         public InfinitePagerAdapter(ViewPager parent) {
             for (int i = 0; i < sRealCount; ++i) {
@@ -75,7 +83,9 @@ public class PhotoPagerView extends RelativeLayout {
             }
 
             ViewCompat.setTransitionName(mViewHolders.get(mPhotoPosition % sRealCount).mView,
-                    getResources().getString(R.string.transition_image));
+                    mTransitionName);
+
+            mPicasso = Picasso.with(getContext());
         }
 
         @Override
@@ -113,11 +123,11 @@ public class PhotoPagerView extends RelativeLayout {
                 mTransitionStarted = true;
             }
 
-            Picasso.with(getContext()).load(mPhotoProvider.get(position).image_url)
+            mPicasso.load(mPhotoProvider.get(position).image_url)
                     .into(holder.mImageView, callback);
 
             container.addView(holder.mView);
-            mPhotoPosition = position;
+            mPhotoPosition = position - 1;
             return holder.mView;
         }
 
@@ -144,6 +154,16 @@ public class PhotoPagerView extends RelativeLayout {
                 mView = view;
             }
         }
+    }
+
+    public void updateTransitionView() {
+        for (InfinitePagerAdapter.PagerViewHolder holder : mAdapter.mViewHolders) {
+            ViewCompat.setTransitionName(holder.mView, "");
+        }
+
+        ViewCompat.setTransitionName(
+                mAdapter.mViewHolders.get(mPhotoPosition % InfinitePagerAdapter.sRealCount).mView,
+                mTransitionName);
     }
 
 }

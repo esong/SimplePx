@@ -11,6 +11,9 @@
 
         <item name="android:windowSharedElementEnterTransition">@transition/photo_transition</item>
         <item name="android:windowSharedElementExitTransition">@transition/photo_transition</item>
+
+        <item name="colorAccent">@color/pxBlue</item>
+        <item name="android:colorAccent">@color/pxBlue</item>
     </style>
 
     <style name="FullScreenTheme" parent="AppTheme">

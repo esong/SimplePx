@@ -1,9 +1,13 @@
 package com.yksong.simplepx;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+
+import com.yksong.simplepx.app.PxApp;
+import com.yksong.simplepx.component.AppComponent;
 
 /**
  * Created by esong on 15-09-12.
@@ -29,5 +33,24 @@ public class BaseActivity extends Activity {
         }
 
         decorView.setSystemUiVisibility(visibility);
+    }
+
+    public AppComponent getAppComponent() {
+        return ((PxApp) getApplication()).getAppComponent();
+    }
+
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void pauseEnterTransition() {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            postponeEnterTransition();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public void startEnterTransition() {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            startPostponedEnterTransition();
+        }
     }
 }

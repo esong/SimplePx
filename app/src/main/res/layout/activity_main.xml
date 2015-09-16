@@ -38,4 +38,10 @@
         app:headerLayout="@layout/drawer_header"
         app:menu="@menu/menu_drawer"/>
 
+    <include
+        layout="@layout/settings_drawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"/>
+
 </android.support.v4.widget.DrawerLayout>

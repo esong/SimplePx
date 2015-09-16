@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="SettingsDrawer.Widget" parent="None">
+        <item name="android:colorControlActivated">@color/pxBlue</item>
+        <item name="android:colorAccent">@color/pxBlue</item>
+        <item name="android:minHeight">26dp</item>
+        <item name="android:layout_marginTop">4dp</item>
+    </style>
+</resources>

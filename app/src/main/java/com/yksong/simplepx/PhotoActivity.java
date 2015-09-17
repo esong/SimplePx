@@ -1,7 +1,5 @@
 package com.yksong.simplepx;
 
-import android.annotation.TargetApi;
-import android.app.SharedElementCallback;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -11,8 +9,6 @@ import android.view.View;
 
 import com.yksong.simplepx.app.PxPreference;
 import com.yksong.simplepx.view.PhotoPagerView;
-
-import java.util.List;
 
 import javax.inject.Inject;
 

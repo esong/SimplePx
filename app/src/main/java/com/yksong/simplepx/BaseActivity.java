@@ -20,7 +20,7 @@ public class BaseActivity extends Activity {
         hideStatusBar();
     }
 
-    private void hideStatusBar() {
+    protected void hideStatusBar() {
         View decorView = getWindow().getDecorView();
         int visibility = 0;
 

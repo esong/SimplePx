@@ -1,7 +1,7 @@
 package com.yksong.simplepx.view;
 
 import android.content.Context;
-import android.content.SharedPreferences;
+import android.os.Handler;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
@@ -10,15 +10,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.yksong.simplepx.PhotoActivity;
 import com.yksong.simplepx.R;
-import com.yksong.simplepx.app.PxApp;
+import com.yksong.simplepx.model.Photo;
 import com.yksong.simplepx.model.PhotoProvider;
+import com.yksong.simplepx.model.SinglePhotoResult;
+import com.yksong.simplepx.network.PxApi;
+import com.yksong.simplepx.widget.TouchImageView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +31,16 @@ import butterknife.Bind;
 import butterknife.BindDimen;
 import butterknife.BindString;
 import butterknife.ButterKnife;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by esong on 15-09-12.
  */
 public class PhotoPagerView extends RelativeLayout {
     @Inject PhotoProvider mPhotoProvider;
+    @Inject PxApi mApi;
 
     @Bind(R.id.pager) ViewPager mViewPager;
     @BindString(R.string.transition_image) String mTransitionName;
@@ -43,6 +49,9 @@ public class PhotoPagerView extends RelativeLayout {
     private InfinitePagerAdapter mAdapter;
     private int mPhotoPosition;
     private boolean mTransitionStarted;
+    private Handler mHandler;
+
+    private static final int UI_ANIMATION_DELAY = 300;
 
     public PhotoPagerView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -51,6 +60,8 @@ public class PhotoPagerView extends RelativeLayout {
         photoActivity.getAppComponent().inject(this);
 
         mPhotoPosition = photoActivity.getIntent().getIntExtra(PhotoActivity.PHOTO_POSITIION, 0);
+
+        mHandler = new Handler();
     }
 
     @Override
@@ -70,7 +81,7 @@ public class PhotoPagerView extends RelativeLayout {
     }
 
     private class InfinitePagerAdapter extends PagerAdapter {
-        static final int sRealCount = 5;
+        static final int sRealCount = 6;
         List<PagerViewHolder> mViewHolders = new ArrayList<>();
 
         private Picasso mPicasso;
@@ -89,50 +100,99 @@ public class PhotoPagerView extends RelativeLayout {
         }
 
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            PagerViewHolder holder = mViewHolders.get(position % sRealCount);
+        public Object instantiateItem(ViewGroup container, final int position) {
+            final PagerViewHolder holder = mViewHolders.get(position % sRealCount);
 
-            Callback callback = null;
+            final Photo photo = mPhotoProvider.get(position);
+
+            holder.mProgressBar.setVisibility(VISIBLE);
 
             if (!mTransitionStarted) {
-                /**
-                 * This callback is used for solve the glitch between EnterTransition, and
-                 * ViewPager. Since ViewPager needs an adapter and it also needs to call
-                 * instantiateItem, and the adapter/method call all happens after finishInflate.
-                 * EnterTransition will be missed.
-                 */
-                callback =  new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        mViewPager.getViewTreeObserver().addOnGlobalLayoutListener(
-                                new ViewTreeObserver.OnGlobalLayoutListener() {
-                            @Override
-                            public void onGlobalLayout() {
-                                mViewPager.getViewTreeObserver()
-                                        .removeOnGlobalLayoutListener(this);
-                                ((PhotoActivity) getContext()).startEnterTransition();
-                            }
-                        });
-                    }
-                    @Override
-                    public void onError() {
-                        ((PhotoActivity) getContext()).startEnterTransition();
-                    }
-                };
-
                 mTransitionStarted = true;
-            }
+                // Load cropped first, then load the uncropped photo.
+                mPicasso.load(photo.image_url)
+                    .into(holder.mImageView, new Callback() {
+                        @Override
+                        public void onSuccess() {
+                            mViewPager.getViewTreeObserver().addOnGlobalLayoutListener(
+                                new ViewTreeObserver.OnGlobalLayoutListener() {
+                                    @Override
+                                    /**
+                                     * This callback is used for solve the glitch between EnterTransition and
+                                     * ViewPager. Since ViewPager needs an adapter and it also needs to call
+                                     * instantiateItem, the adapter/method call all happens after finishInflate.
+                                     * EnterTransition will be missed.
+                                     */
+                                    public void onGlobalLayout() {
+                                        ((PhotoActivity) getContext()).startEnterTransition();
+                                        mViewPager.getViewTreeObserver()
+                                                .removeOnGlobalLayoutListener(this);
 
-            mPicasso.load(mPhotoProvider.get(position).image_url)
-                    .into(holder.mImageView, callback);
+                                        // Delay loading uncropped photo, wait until transition
+                                        // finishes.
+                                        mHandler.postDelayed(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                loadUncroppedPhoto(holder, photo.id);
+                                            }
+                                        }, UI_ANIMATION_DELAY);
+                                    }
+                                });
+                        }
+
+                        @Override
+                        public void onError() {
+                            ((PhotoActivity) getContext()).startEnterTransition();
+                        }
+                    });
+            } else {
+                loadUncroppedPhoto(holder, photo.id);
+            }
 
             container.addView(holder.mView);
             mPhotoPosition = position - 1;
             return holder.mView;
         }
 
+
+        /*
+         * Load uncropped photo from PxApi.
+         *
+         * The ideal solution is to request multiple image_size from the /photos api;
+         * however, after setting image_size[], a consumer key error is returned. Thus,
+         * I used this solution.
+         */
+        private void loadUncroppedPhoto(final PagerViewHolder holder, int photoId) {
+            mApi.photoById(photoId)
+                    .subscribeOn(Schedulers.newThread())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<SinglePhotoResult>() {
+                        @Override
+                        public void call(SinglePhotoResult apiResult) {
+                            if (apiResult.photo != null) {
+                                mPicasso.load(apiResult.photo.image_url)
+                                    .into(holder.mImageView, new Callback() {
+                                        @Override
+                                        public void onSuccess() {
+                                            holder.mProgressBar.setVisibility(GONE);
+                                            holder.mImageView.setZoom(1);
+                                        }
+
+                                        @Override
+                                        public void onError() {
+                                        }
+                                    });
+                            }
+                        }
+                    });
+        }
+
+
         public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView((View) object);
+            View view = (View) object;
+            container.removeView(view);
+            TouchImageView imageView = (TouchImageView) view.findViewById(R.id.imageGrid);
+            imageView.destroyDrawingCache();
         }
 
         @Override
@@ -146,11 +206,13 @@ public class PhotoPagerView extends RelativeLayout {
         }
 
         class PagerViewHolder {
-            ImageView mImageView;
+            TouchImageView mImageView;
+            View mProgressBar;
             View mView;
 
             public PagerViewHolder(View view) {
-                mImageView = (ImageView) view.findViewById(R.id.imageGrid);
+                mImageView = (TouchImageView) view.findViewById(R.id.imageGrid);
+                mProgressBar = view.findViewById(R.id.progressBar);
                 mView = view;
             }
         }

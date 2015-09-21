@@ -27,6 +27,15 @@ need to rewrite singleton instantiation and findViewById in every single class I
 
 RxJava & RxAndroid: These library are used for async network calls. They're supported by retrofit.
 
+## Testing
+
+To run the integration tests:
+
+    ./gradlew connectedAndroidTest
+
+Note: There are some weird glitches using tests with emulators, it is recommended to use a phone to
+run the tests.
+
 ## Implementation details and decisions by parts
 
 Part 1, 2, 4 are omitted as they are all implemented in the later parts.

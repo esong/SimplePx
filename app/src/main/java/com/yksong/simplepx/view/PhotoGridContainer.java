@@ -1,6 +1,5 @@
 package com.yksong.simplepx.view;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -21,8 +20,6 @@ import com.yksong.simplepx.BaseActivity;
 import com.yksong.simplepx.MainActivity;
 import com.yksong.simplepx.PhotoActivity;
 import com.yksong.simplepx.R;
-import com.yksong.simplepx.app.PxApp;
-import com.yksong.simplepx.model.Photo;
 import com.yksong.simplepx.model.PhotoProvider;
 
 import javax.inject.Inject;
@@ -65,6 +62,7 @@ public class PhotoGridContainer extends RelativeLayout {
         super.onFinishInflate();
 
         ButterKnife.bind(this);
+
         mLayoutManager = new GridLayoutManager(getContext(), 3) {
 
             @Override
@@ -109,6 +107,16 @@ public class PhotoGridContainer extends RelativeLayout {
         PxAdapter adapter = new PxAdapter(mPhotoProvider);
         mPhotoList.setAdapter(adapter);
         mPhotoProvider.takePhotoGrid(adapter);
+
+        // If PhotoProvider is not inited, initialize PhotoProvider under current config.
+        if (!mPhotoProvider.isInited()) {
+            mPhotoProvider.init(new Runnable() {
+                @Override
+                public void run() {
+                    mPhotoList.invalidate();
+                }
+            });
+        }
     }
 
     public void moveToPosition(int position) {

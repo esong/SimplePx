@@ -27,6 +27,7 @@ public class PhotoProvider {
     private PxApp mApp;
 
     private WeakReference<RecyclerView.Adapter> mPhotoAdapter;
+    private boolean mInited;
     private boolean mRequesting;
 
     private Action1<Throwable> mErrorAction = new Action1<Throwable>() {
@@ -46,6 +47,10 @@ public class PhotoProvider {
         mCurEndpoint = new ApiResult(getFeatureString());
 
         mPhotoCache.put(mCurEndpoint.feature, mCurEndpoint);
+    }
+
+    public boolean isInited() {
+        return mInited;
     }
 
     public Photo get(int position) {
@@ -86,12 +91,17 @@ public class PhotoProvider {
     }
 
     public void init(final Runnable finished) {
+        mInited = true;
         requestAsyncObservable().subscribe(new Action1<ApiResult>() {
             @Override
             public void call(ApiResult apiResult) {
                 mRequesting = false;
                 mCurEndpoint.photos = apiResult.photos;
                 finished.run();
+
+                if (mPhotoAdapter != null) {
+                    mPhotoAdapter.get().notifyDataSetChanged();
+                }
             }
         }, mErrorAction);
     }

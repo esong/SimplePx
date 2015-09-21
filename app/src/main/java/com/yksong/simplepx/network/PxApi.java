@@ -1,7 +1,6 @@
 package com.yksong.simplepx.network;
 
 import com.yksong.simplepx.model.ApiResult;
-import com.yksong.simplepx.model.Photo;
 import com.yksong.simplepx.model.SinglePhotoResult;
 
 import retrofit.http.GET;

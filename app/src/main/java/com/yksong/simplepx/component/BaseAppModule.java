@@ -1,9 +1,7 @@
 package com.yksong.simplepx.component;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.yksong.simplepx.R;
 import com.yksong.simplepx.app.PxApp;
@@ -16,23 +14,21 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
-import retrofit.ErrorHandler;
 import retrofit.RestAdapter;
-import retrofit.RetrofitError;
 
 /**
  * Created by esong on 15-09-09.
  */
 @Module
-public class AppModule {
-    private final PxApi mApi;
-    private final SharedPreferences mPreferences;
-    private final PhotoProvider mPhotoProvider;
-    private final PxApp mApp;
+public class BaseAppModule {
+    protected PxApi mApi = null;
+    protected SharedPreferences mPreferences = null;
+    protected PhotoProvider mPhotoProvider = null;
+    protected PxApp mApp = null;
 
-    private static String HOST = "https://api.500px.com/v1";
+    protected static String HOST = "https://api.500px.com/v1";
 
-    public AppModule(final PxApp application) {
+    public BaseAppModule(final PxApp application) {
         mApp = application;
 
         String consumerKey = application.getResources().getString(R.string.pxConsumerKey);
@@ -50,6 +46,8 @@ public class AppModule {
 
         mPhotoProvider = new PhotoProvider(mApp, mApi, mPreferences);
     }
+
+    public BaseAppModule() {}
 
     @Provides
     @Singleton

@@ -80,8 +80,8 @@ public class PhotoPagerView extends RelativeLayout {
         return mPhotoPosition;
     }
 
-    private class InfinitePagerAdapter extends PagerAdapter {
-        static final int sRealCount = 6;
+    public class InfinitePagerAdapter extends PagerAdapter {
+        public static final int sRealCount = 6;
         List<PagerViewHolder> mViewHolders = new ArrayList<>();
 
         private Picasso mPicasso;
@@ -153,7 +153,6 @@ public class PhotoPagerView extends RelativeLayout {
             mPhotoPosition = position - 1;
             return holder.mView;
         }
-
 
         /*
          * Load uncropped photo from PxApi.

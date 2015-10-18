@@ -99,8 +99,9 @@ public class PhotoProvider {
                 mCurEndpoint.photos = apiResult.photos;
                 finished.run();
 
-                if (mPhotoAdapter != null) {
-                    mPhotoAdapter.get().notifyDataSetChanged();
+                RecyclerView.Adapter adapter = mPhotoAdapter.get();
+                if (adapter != null) {
+                    adapter.notifyDataSetChanged();
                 }
             }
         }, mErrorAction);
@@ -114,8 +115,9 @@ public class PhotoProvider {
                 int originalPos = mCurEndpoint.photos.size();
                 mCurEndpoint.photos.addAll(apiResult.photos);
 
-                if (mPhotoAdapter != null) {
-                    mPhotoAdapter.get().notifyItemRangeInserted(originalPos,
+                RecyclerView.Adapter adapter = mPhotoAdapter.get();
+                if (adapter != null) {
+                    adapter.notifyItemRangeInserted(originalPos,
                             apiResult.photos.size());
                 }
             }

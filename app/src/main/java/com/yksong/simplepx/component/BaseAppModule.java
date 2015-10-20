@@ -3,6 +3,7 @@ package com.yksong.simplepx.component;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.yksong.simplepx.R;
 import com.yksong.simplepx.app.PxApp;
 import com.yksong.simplepx.app.PxPreference;
@@ -23,6 +24,7 @@ import retrofit.RestAdapter;
 public class BaseAppModule {
     protected PxApi mApi = null;
     protected SharedPreferences mPreferences = null;
+    protected RxSharedPreferences mRxPreference = null;
     protected PhotoProvider mPhotoProvider = null;
     protected PxApp mApp = null;
 
@@ -44,6 +46,8 @@ public class BaseAppModule {
         mPreferences = application.getSharedPreferences(PxPreference.PREFERENCE_NAME,
                 Context.MODE_PRIVATE);
 
+        mRxPreference = RxSharedPreferences.create(mPreferences);
+
         mPhotoProvider = new PhotoProvider(mApp, mApi, mPreferences);
     }
 
@@ -59,6 +63,12 @@ public class BaseAppModule {
     @Singleton
     public SharedPreferences providePreferences() {
         return mPreferences;
+    }
+
+    @Provides
+    @Singleton
+    public RxSharedPreferences provideRxPreferences() {
+        return mRxPreference;
     }
 
     @Provides

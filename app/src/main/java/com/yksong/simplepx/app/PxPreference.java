@@ -12,4 +12,7 @@ public class PxPreference  {
 
     public static String SETTING_DEBUG_FULL_TRANSITION = "PX_SETTING_DEBUG_FULL_TRANSITION";
     public static boolean SETTING_DEBUG_FULL_TRANSITION_DEFAULT = false;
+
+    public static String SETTING_VIEW_TYPE = "PX_SETTING_VIEW_TYPE";
+    public static int SETTING_VIEW_TYPE_DEFAULT = 0;
 }

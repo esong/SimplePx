@@ -28,6 +28,9 @@
         <activity
             android:name=".PhotoActivity"
             android:theme="@style/FullScreenTheme"/>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="8fdd2a4c55a40982f4cea0c0850af6ef6953945d" />
     </application>
 
 </manifest>

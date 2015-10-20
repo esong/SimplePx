@@ -99,9 +99,12 @@ public class PhotoProvider {
                 mCurEndpoint.photos = apiResult.photos;
                 finished.run();
 
-                RecyclerView.Adapter adapter = mPhotoAdapter.get();
-                if (adapter != null) {
-                    adapter.notifyDataSetChanged();
+
+                if (mPhotoAdapter != null) {
+                    RecyclerView.Adapter adapter = mPhotoAdapter.get();
+                    if (adapter != null) {
+                        adapter.notifyDataSetChanged();
+                    }
                 }
             }
         }, mErrorAction);
@@ -115,10 +118,13 @@ public class PhotoProvider {
                 int originalPos = mCurEndpoint.photos.size();
                 mCurEndpoint.photos.addAll(apiResult.photos);
 
-                RecyclerView.Adapter adapter = mPhotoAdapter.get();
-                if (adapter != null) {
-                    adapter.notifyItemRangeInserted(originalPos,
-                            apiResult.photos.size());
+                if (mPhotoAdapter != null) {
+                    RecyclerView.Adapter adapter = mPhotoAdapter.get();
+
+                    if (adapter != null) {
+                        adapter.notifyItemRangeInserted(originalPos,
+                                apiResult.photos.size());
+                    }
                 }
             }
         }, mErrorAction);

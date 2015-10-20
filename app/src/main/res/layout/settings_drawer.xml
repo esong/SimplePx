@@ -16,16 +16,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="start|fill_horizontal"
-            android:orientation="horizontal"
-            >
+            android:orientation="horizontal">
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginRight="8dp"
                 android:gravity="center_vertical|right"
-                android:orientation="vertical"
-                >
+                android:orientation="vertical">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -39,6 +37,23 @@
                     style="@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle"/>
             </LinearLayout>
         </LinearLayout>
+
+        <GridLayout
+            android:id="@+id/browsing_grid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:columnCount="2">
+
+            <TextView
+                android:layout_gravity="start|center_vertical"
+                android:text="Views"
+                style="@style/SettingsDrawer.Setting"/>
+            <Spinner
+                android:id="@+id/view_spinner"
+                android:layout_gravity="end|center_vertical" />
+
+        </GridLayout>
 
         <GridLayout
             android:id="@+id/debug_grid"

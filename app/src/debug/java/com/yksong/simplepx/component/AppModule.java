@@ -18,21 +18,6 @@ import retrofit.RestAdapter;
 @Module
 public class AppModule extends BaseAppModule {
     public AppModule(final PxApp application) {
-        mApp = application;
-
-        String consumerKey = application.getResources().getString(R.string.pxConsumerKey);
-        String consumerSecret = application.getResources().getString(R.string.pxConsumerSecret);
-
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint(BaseAppModule.HOST)
-                .setClient(new SignedOkClient(consumerKey, consumerSecret))
-                .build();
-
-        mApi = restAdapter.create(PxApi.class);
-
-        mPreferences = application.getSharedPreferences(PxPreference.PREFERENCE_NAME,
-                Context.MODE_PRIVATE);
-
-        mPhotoProvider = new PhotoProvider(mApp, mApi, mPreferences);
+        super(application);
     }
 }

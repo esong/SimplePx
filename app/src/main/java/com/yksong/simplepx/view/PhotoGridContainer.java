@@ -6,6 +6,7 @@ import android.graphics.Rect;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.util.Pair;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -15,11 +16,14 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
+import com.f2prateek.rx.preferences.Preference;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.squareup.picasso.Picasso;
 import com.yksong.simplepx.BaseActivity;
 import com.yksong.simplepx.MainActivity;
 import com.yksong.simplepx.PhotoActivity;
 import com.yksong.simplepx.R;
+import com.yksong.simplepx.app.PxPreference;
 import com.yksong.simplepx.model.PhotoProvider;
 
 import javax.inject.Inject;
@@ -28,6 +32,7 @@ import butterknife.Bind;
 import butterknife.BindString;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import rx.functions.Action1;
 
 /**
  * Created by esong on 15-09-09.
@@ -37,9 +42,12 @@ public class PhotoGridContainer extends RelativeLayout {
     @BindString(R.string.transition_image) String mTransitionImage;
 
     @Inject PhotoProvider mPhotoProvider;
+    @Inject RxSharedPreferences mRxPreferences;
 
-    private GridLayoutManager mLayoutManager;
+    Preference<Integer> mViewTypePref;
+
     private int mImageMargin;
+    private RecyclerView.ItemDecoration mDecoration;
 
     public PhotoGridContainer(Context context) {
         this(context, null);
@@ -55,6 +63,9 @@ public class PhotoGridContainer extends RelativeLayout {
         mImageMargin = (int) context.getResources().getDimension(R.dimen.image_margin);
 
         ((BaseActivity) context).getAppComponent().inject(this);
+
+        mViewTypePref = mRxPreferences.getInteger(PxPreference.SETTING_VIEW_TYPE,
+                PxPreference.SETTING_VIEW_TYPE_DEFAULT);
     }
 
     @Override
@@ -63,44 +74,10 @@ public class PhotoGridContainer extends RelativeLayout {
 
         ButterKnife.bind(this);
 
-        mLayoutManager = new GridLayoutManager(getContext(), 3) {
-
+        mViewTypePref.asObservable().subscribe(new Action1<Integer>() {
             @Override
-            /**
-             * Increase layout space for the RecyclerView.
-             * This makes RecyclerView rendering 2 screens of photos,
-             * which reduces the chance of seeing empty grid.
-             */
-            protected int getExtraLayoutSpace(RecyclerView.State state) {
-                return getHeight() * 2;
-            }
-        };
-
-        mPhotoList.setLayoutManager(mLayoutManager);
-
-        mPhotoList.getViewTreeObserver().addOnGlobalLayoutListener(
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    /**
-                     * Dynamically calculate the number of spans according to the screen size.
-                     */
-                    public void onGlobalLayout() {
-                        mPhotoList.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        int viewWidth = mPhotoList.getMeasuredWidth();
-                        float cardViewWidth = getContext().getResources()
-                                .getDimension(R.dimen.photo_dimen);
-                        int newSpanCount = (int) Math.ceil(viewWidth / cardViewWidth);
-                        mLayoutManager.setSpanCount(newSpanCount);
-                        mLayoutManager.requestLayout();
-                    }
-                });
-
-        mPhotoList.addItemDecoration(new RecyclerView.ItemDecoration() {
-            @Override
-            public void getItemOffsets(Rect outRect, View view,
-                                       RecyclerView parent, RecyclerView.State state) {
-                outRect.right = mImageMargin;
-                outRect.bottom = mImageMargin;
+            public void call(Integer integer) {
+                selectLayout(integer);
             }
         });
 
@@ -117,6 +94,86 @@ public class PhotoGridContainer extends RelativeLayout {
                 }
             });
         }
+    }
+
+    private void selectLayout(Integer layoutType) {
+        int type = layoutType == null ?
+                PxPreference.SETTING_VIEW_TYPE_DEFAULT : layoutType;
+
+        mPhotoList.removeItemDecoration(mDecoration);
+
+        switch (type) {
+            case 1 : {
+                setGridLayoutManger();
+                break;
+            }
+            default: {
+                setListLayoutManger();
+            }
+        }
+    }
+
+    public void setGridLayoutManger() {
+        final GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 3) {
+
+            @Override
+            /**
+             * Increase layout space for the RecyclerView.
+             * This makes RecyclerView rendering 2 screens of photos,
+             * which reduces the chance of seeing empty grid.
+             */
+            protected int getExtraLayoutSpace(RecyclerView.State state) {
+                return getHeight() * 2;
+            }
+        };
+
+        mPhotoList.setLayoutManager(gridLayoutManager);
+
+        mPhotoList.getViewTreeObserver().addOnGlobalLayoutListener(
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    /**
+                     * Dynamically calculate the number of spans according to the screen size.
+                     */
+                    public void onGlobalLayout() {
+                        mPhotoList.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        int viewWidth = mPhotoList.getMeasuredWidth();
+                        float cardViewWidth = getContext().getResources()
+                                .getDimension(R.dimen.photo_dimen);
+                        int newSpanCount = (int) Math.ceil(viewWidth / cardViewWidth);
+                        gridLayoutManager.setSpanCount(newSpanCount);
+                        gridLayoutManager.requestLayout();
+                    }
+                });
+
+        mDecoration = new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(Rect outRect, View view,
+                                       RecyclerView parent, RecyclerView.State state) {
+                outRect.right = mImageMargin;
+                outRect.bottom = mImageMargin;
+            }
+        };
+
+        mPhotoList.addItemDecoration(mDecoration);
+    }
+
+    public void setListLayoutManger() {
+        mPhotoList.setLayoutManager(new LinearLayoutManager(getContext()){
+            protected int getExtraLayoutSpace(RecyclerView.State state) {
+                return getHeight() * 2;
+            }
+        });
+
+        mDecoration = new RecyclerView.ItemDecoration() {
+            @Override
+            public void getItemOffsets(Rect outRect, View view,
+                                       RecyclerView parent, RecyclerView.State state) {
+                outRect.bottom = mImageMargin;
+            }
+        };
+
+        mPhotoList.addItemDecoration(mDecoration);
     }
 
     public void moveToPosition(int position) {

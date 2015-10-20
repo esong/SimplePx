@@ -13,4 +13,9 @@
 
     <string name="settings">Settings</string>
     <string name="network_error">Network Error: please try again later.</string>
+
+    <string-array name="view_array">
+        <item>List View</item>
+        <item>Grids View</item>
+    </string-array>
 </resources>
